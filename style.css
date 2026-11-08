@@ -718,6 +718,29 @@ blockquote {
     display: none;
 }
 
+.form-status.error {
+    background-color: #fdecea;
+    border-left-color: #b3261e;
+}
+
+/* Spam trap: hidden from people, visible to bots */
+.field-hp {
+    position: absolute;
+    left: -9999px;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+}
+
+.contact-form {
+    position: relative;
+}
+
+.contact-form button:disabled {
+    opacity: 0.6;
+    cursor: wait;
+}
+
 .form-status {
     background-color: #e8f6fc;
     border-left: 5px solid var(--sky);
