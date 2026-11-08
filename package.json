@@ -1,0 +1,13 @@
+{
+  "name": "wdg-demo-site",
+  "private": true,
+  "type": "module",
+  "description": "WDG demo website: static pages plus Vercel functions for the contact form and news admin",
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "@vercel/blob": "^2.8.2",
+    "postgres": "^4.1.0"
+  }
+}

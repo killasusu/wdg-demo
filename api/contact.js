@@ -30,7 +30,7 @@ function clean(value, maxLength) {
     return typeof value === 'string' ? value.trim().slice(0, maxLength) : '';
 }
 
-module.exports = async function handler(req, res) {
+export default async function handler(req, res) {
     if (req.method !== 'POST') {
         res.setHeader('Allow', 'POST');
         return res.status(405).json({ ok: false, error: 'Method not allowed.' });

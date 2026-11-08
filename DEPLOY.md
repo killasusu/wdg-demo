@@ -1,38 +1,57 @@
 # Deploying the WDG demo site to Vercel
 
-The site is plain HTML/CSS/JS plus one serverless function:
+Live demo: https://wdg-demo.vercel.app (Vercel team `kill75`, auto-deploys on every push to `main`).
 
-- `*.html`, `style.css`, `fb.js` – static pages, served as-is
-- `api/contact.js` – backend for the contact form (`POST /api/contact`), sends the message by email through Resend
+## What's in the project
 
-## 1. Email service (Resend)
+| Part | Files | Runs where |
+|---|---|---|
+| Static pages | `*.html`, `style.css`, `fb.js` | Served as-is |
+| Contact form backend | `api/contact.js` | Vercel function → emails through Resend |
+| Public news feed | `api/news.js`, `news-db.js`, `story.html` | Vercel function → reads Postgres (Neon) |
+| News admin | `admin.html`, `admin.js`, `api/admin/login.js`, `api/admin/news.js` | Vercel functions → Postgres + Vercel Blob (photos) |
+| Shared helpers | `api/_lib/db.js`, `api/_lib/auth.js` | Not endpoints (names starting with `_` are skipped) |
 
-1. Sign up at https://resend.com with **director@womendevelopmentgroup.org**.
-2. API Keys → Create API key (permission: "Sending access"). Copy it (starts with `re_`).
+The 5 original stories are still plain HTML files. Stories added in the admin page appear above them.
 
-Until you verify a domain, Resend can only deliver to the address you signed up with – that's fine for testing.
-For a customer, add their domain in Resend → Domains, add the DNS records it shows, then set `CONTACT_FROM`
-to something like `Website <website@theirdomain.org>`.
+## Environment variables (Vercel → Project → Settings → Environment Variables)
 
-## 2. Vercel
+| Variable | Needed for | How it gets there |
+|---|---|---|
+| `RESEND_API_KEY` | Contact form | You paste it (Resend → API Keys) |
+| `CONTACT_TO` | Contact form | You set it. Must be your Resend sign-up email until a domain is verified |
+| `CONTACT_FROM` | Contact form (optional) | Only after verifying a domain in Resend |
+| `DATABASE_URL` | News | **Added automatically** when you connect a Neon database |
+| `BLOB_READ_WRITE_TOKEN` | News photos | **Added automatically** when you connect a Blob store |
+| `ADMIN_PASSWORD` | Admin login | You choose it: 10+ characters, mark it **Secret** |
+| `ADMIN_SESSION_SECRET` | Admin login (optional) | Any long random text; if unset the password is used |
 
-1. Sign up at https://vercel.com with GitHub (account killasusu).
-2. Add New → Project → import **killasusu/wdg-demo**.
-3. Framework preset: **Other**. Leave build/output settings empty. Deploy.
-4. Settings → Environment Variables, add:
-   - `RESEND_API_KEY` = your key
-   - `CONTACT_TO` = director@womendevelopmentgroup.org (optional, this is the default)
-   - `CONTACT_FROM` = optional, default `WDG Website <onboarding@resend.dev>`
-5. Deployments → ⋯ → Redeploy (env vars only apply to new deployments).
+After adding or changing any variable: **Deployments → ⋯ → Redeploy**.
 
-Every `git push` to `main` now deploys automatically. Pushes to other branches get preview URLs.
+## Setting up storage (one time)
 
-## 3. Test
+1. **Database:** Project → **Storage** → **Create Database** → **Neon** (Postgres) → free plan → region close to your users
+   (e.g. Frankfurt) → connect to project `wdg-demo`. The `news_posts` table is created automatically on first use.
+2. **Photos:** Project → **Storage** → **Create** → **Blob** → access **Public** → connect to project `wdg-demo`.
+3. **Admin password:** add `ADMIN_PASSWORD` (type **Secret**).
+4. Redeploy.
 
-Open `https://<project>.vercel.app/contact.html`, send a message, check the inbox.
-If it fails: Vercel → Project → Logs shows the error from `api/contact.js`.
+## Using it
+
+- Admin: `https://wdg-demo.vercel.app/admin.html` → log in → write story → optional photo → Save.
+- Text format: blank line = new paragraph; a line starting with `## ` = heading.
+- Photos are resized in the browser to max 1600 px before upload.
+- New stories show on the News page within about a minute (the list is cached for 60 seconds).
+
+## Troubleshooting
+
+- Vercel → Project → **Logs**: errors from the functions (`[news]`, `[admin/news]`, `Resend error`).
+- Resend → **Logs**: why an email was refused.
+- Neon (Vercel → Storage → your database → Open in Neon) → **Tables**: see the stored stories.
 
 ## Notes
 
-- On GitHub Pages (no backend) the form falls back to opening the visitor's email app.
-- `website` is a hidden spam-trap field; submissions that fill it are silently dropped.
+- On GitHub Pages (no backend) the contact form falls back to the visitor's email app and the News page shows only the static stories.
+- `website` is a hidden spam-trap field on the contact form.
+- Admin security: one shared password, a signed HttpOnly cookie for 8 hours, JSON-only requests (blocks forged
+  cross-site requests). Fine for a small team; a customer with many editors would need individual accounts.

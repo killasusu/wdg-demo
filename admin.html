@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex, nofollow">
+    <title>News Admin | Women Development Group (WDG)</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Poppins:wght@600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" type="image/png" href="logo-256.png">
+</head>
+<body>
+    <header>
+        <div class="container nav-bar">
+            <a class="brand" href="index.html">
+                <img class="brand-logo" src="logo-256.png" alt="Women Development Group logo" width="52" height="52">
+                <span class="brand-name">Women Development Group<small>News admin</small></span>
+            </a>
+            <button class="btn btn-outline admin-logout" type="button" hidden>Log out</button>
+        </div>
+    </header>
+
+    <main>
+        <section class="page-banner">
+            <div class="container">
+                <p class="eyebrow">Staff only</p>
+                <h1>News Admin</h1>
+                <p>Write a story, add a photo, and publish it to the News page.</p>
+            </div>
+        </section>
+
+        <!-- Login -->
+        <section class="section admin-login" hidden>
+            <div class="container">
+                <form class="contact-form admin-narrow" id="login-form">
+                    <div class="field field-wide">
+                        <label for="admin-password">Admin password</label>
+                        <input type="password" id="admin-password" name="password" autocomplete="current-password" required>
+                    </div>
+                    <div class="field-wide form-actions">
+                        <button type="submit" class="btn btn-primary">Log in</button>
+                    </div>
+                    <p class="form-status field-wide" role="status" aria-live="polite"></p>
+                </form>
+            </div>
+        </section>
+
+        <!-- Editor -->
+        <section class="section section-alt admin-editor" hidden>
+            <div class="container">
+                <div class="section-title">
+                    <p class="eyebrow">New story</p>
+                    <h2>Write a Story</h2>
+                    <p>Leave a blank line between paragraphs. Start a line with <strong>##</strong> to make it a heading.</p>
+                </div>
+                <form class="contact-form" id="story-form" novalidate>
+                    <div class="field field-wide">
+                        <label for="s-title">Title *</label>
+                        <input type="text" id="s-title" name="title" maxlength="160" required>
+                    </div>
+                    <div class="field">
+                        <label for="s-category">Category</label>
+                        <input type="text" id="s-category" name="category" maxlength="40" list="categories" placeholder="e.g. GBV Prevention">
+                        <datalist id="categories">
+                            <option value="Accountability">
+                            <option value="Women's Rights">
+                            <option value="GBV Prevention">
+                            <option value="Protection">
+                            <option value="Peacebuilding">
+                            <option value="Livelihoods">
+                            <option value="Digital Safety">
+                        </datalist>
+                    </div>
+                    <div class="field">
+                        <label for="s-date">Date</label>
+                        <input type="date" id="s-date" name="publishedOn">
+                    </div>
+                    <div class="field field-wide">
+                        <label for="s-summary">Short summary (shown on the News page)</label>
+                        <input type="text" id="s-summary" name="summary" maxlength="300">
+                    </div>
+                    <div class="field field-wide">
+                        <label for="s-body">Story *</label>
+                        <textarea id="s-body" name="body" rows="12" required></textarea>
+                    </div>
+                    <div class="field field-wide">
+                        <label for="s-image">Photo (optional, it will be resized automatically)</label>
+                        <input type="file" id="s-image" accept="image/jpeg,image/png,image/webp">
+                        <img class="admin-preview" alt="Selected photo preview" hidden>
+                    </div>
+                    <div class="field field-wide admin-check">
+                        <input type="checkbox" id="s-published" name="published" checked>
+                        <label for="s-published">Publish now (untick to save as a draft)</label>
+                    </div>
+                    <div class="field-wide form-actions">
+                        <button type="submit" class="btn btn-primary">Save story</button>
+                    </div>
+                    <p class="form-status field-wide" role="status" aria-live="polite"></p>
+                </form>
+            </div>
+        </section>
+
+        <!-- Existing stories -->
+        <section class="section admin-editor" hidden>
+            <div class="container">
+                <div class="section-title">
+                    <p class="eyebrow">Stories</p>
+                    <h2>Saved Stories</h2>
+                    <p>Stories saved here appear above the older stories on the News page.</p>
+                </div>
+                <ul class="admin-list" id="story-list"></ul>
+            </div>
+        </section>
+    </main>
+
+    <script src="admin.js"></script>
+</body>
+</html>
