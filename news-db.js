@@ -47,6 +47,7 @@ async function loadNewsList(list) {
         const url = 'story.html?slug=' + encodeURIComponent(post.slug);
         const card = el('li', 'card');
         if (post.imageUrl) {
+            card.classList.add('has-image');
             const img = el('img', 'card-image');
             img.src = post.imageUrl;
             img.alt = '';

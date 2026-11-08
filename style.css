@@ -1072,6 +1072,11 @@ header::after {
 }
 
 /* ---------- News from the database ---------- */
+/* Clip the photo to the card's rounded corners */
+.card.has-image {
+    overflow: hidden;
+}
+
 .card-image {
     display: block;
     width: calc(100% + 3.5rem);
