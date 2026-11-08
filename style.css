@@ -1077,24 +1077,83 @@ header::after {
     overflow: hidden;
 }
 
-.card-image {
-    display: block;
-    width: calc(100% + 3.5rem);
-    max-width: none;
-    height: 180px;
-    object-fit: cover;
-    margin: -1.75rem -1.75rem 1.1rem;
-    border-radius: 0;
+/* While news-db.js loads stories, keep the list hidden so nothing jumps */
+.cards.news-pending > * {
+    opacity: 0 !important;
+    transform: translateY(28px) !important;
+    transition: none !important;
 }
 
-.story-image {
-    display: block;
-    width: 100%;
-    max-height: 460px;
-    object-fit: cover;
+/* Photo boxes: fixed size, soft shimmer while loading, then the photo fades in */
+.card-media,
+.story-media {
+    position: relative;
+    overflow: hidden;
+    background-color: #efe6e1;
+}
+
+.card-media {
+    height: 180px;
+    margin: -1.75rem -1.75rem 1.1rem;
+}
+
+.story-media {
     border-radius: var(--radius);
     margin-bottom: 1.5rem;
 }
+
+.story-media.is-loading {
+    aspect-ratio: 4 / 3;
+    max-height: 460px;
+}
+
+.card-media.is-loading::after,
+.story-media.is-loading::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(100deg, transparent 20%, rgba(255, 255, 255, 0.55) 50%, transparent 80%);
+    transform: translateX(-100%);
+    animation: shimmer 1.4s ease-in-out infinite;
+}
+
+@keyframes shimmer {
+    to { transform: translateX(100%); }
+}
+
+.card-image,
+.story-image {
+    display: block;
+    width: 100%;
+    object-fit: cover;
+    border-radius: 0;
+    opacity: 1;
+    transform: none;
+    transition: opacity 0.6s ease, transform 0.8s ease;
+}
+
+.card-image {
+    height: 100%;
+}
+
+.story-image {
+    max-height: 460px;
+}
+
+.is-loading > .card-image,
+.is-loading > .story-image {
+    opacity: 0;
+    transform: scale(1.04);
+}
+
+/* Story text fades up once it has loaded */
+.story-ready > * {
+    animation: fade-up 0.6s ease both;
+}
+
+.story-ready > :nth-child(2) { animation-delay: 0.08s; }
+.story-ready > :nth-child(3) { animation-delay: 0.16s; }
+.story-ready > :nth-child(n+4) { animation-delay: 0.24s; }
 
 .story-paragraph {
     white-space: pre-line;

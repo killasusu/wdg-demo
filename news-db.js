@@ -32,14 +32,47 @@ function renderBody(container, body) {
     });
 }
 
+// Photo inside a placeholder box: the box shows a soft shimmer while the photo
+// downloads, then the photo fades in (no sudden pop).
+function fadingImage(src, boxClass, imgClass) {
+    const box = el('div', boxClass + ' is-loading');
+    const img = el('img', imgClass);
+    img.alt = '';
+    img.decoding = 'async';
+    function done() { box.classList.remove('is-loading'); }
+    img.addEventListener('load', done);
+    img.addEventListener('error', done);
+    img.src = src;
+    if (img.complete) done(); // already cached
+    box.appendChild(img);
+    return box;
+}
+
+// Show the whole list (old + new stories) together, with the site's usual staggered fade-up.
+// Old stories keep fb.js's scroll animation; new stories (at the top) are marked visible.
+function revealList(list) {
+    Array.from(list.children).forEach(function(card, index) {
+        card.style.setProperty('--i', index % 6);
+        if (!card.classList.contains('reveal')) card.classList.add('reveal', 'in');
+    });
+    // Wait two frames so the browser has drawn the hidden state, then fade everything in
+    requestAnimationFrame(function() {
+        requestAnimationFrame(function() { list.classList.remove('news-pending'); });
+    });
+}
+
 async function loadNewsList(list) {
-    let data;
+    // Hold the list back briefly so new stories don't push the old ones down mid-animation.
+    // If the server is slow, show the old stories after 2.5 s anyway.
+    list.classList.add('news-pending');
+    const giveUp = setTimeout(function() { revealList(list); }, 2500);
+
+    let data = { posts: [] };
     try {
         const response = await fetch('/api/news');
-        if (!response.ok) return; // no backend (e.g. GitHub Pages): keep the static stories
-        data = await response.json();
+        if (response.ok) data = await response.json(); // no backend (e.g. GitHub Pages): only static stories
     } catch (error) {
-        return;
+        // offline or no backend: keep the static stories
     }
 
     const first = list.firstElementChild;
@@ -48,11 +81,7 @@ async function loadNewsList(list) {
         const card = el('li', 'card');
         if (post.imageUrl) {
             card.classList.add('has-image');
-            const img = el('img', 'card-image');
-            img.src = post.imageUrl;
-            img.alt = '';
-            img.loading = 'lazy';
-            card.appendChild(img);
+            card.appendChild(fadingImage(post.imageUrl, 'card-media', 'card-image'));
         }
         card.appendChild(el('span', 'news-meta', metaLine(post)));
         const h3 = el('h3');
@@ -66,6 +95,9 @@ async function loadNewsList(list) {
         card.appendChild(more);
         list.insertBefore(card, first);
     });
+
+    clearTimeout(giveUp);
+    revealList(list);
 }
 
 async function loadStory(page) {
@@ -84,13 +116,11 @@ async function loadStory(page) {
         page.querySelector('.story-summary').textContent = post.summary || '';
 
         if (post.imageUrl) {
-            const img = el('img', 'story-image');
-            img.src = post.imageUrl;
-            img.alt = '';
-            article.appendChild(img);
+            article.appendChild(fadingImage(post.imageUrl, 'story-media', 'story-image'));
         }
         renderBody(article, post.body);
         status.remove();
+        article.classList.add('story-ready'); // text fades up
     } catch (error) {
         page.querySelector('.story-title').textContent = 'Story not found';
         status.textContent = 'This story may have been removed. Please return to the news page.';
